@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Sistema de predicción de cáncer de pulmón mediante datos clínicos y análisis de imágenes médicas">
+    <title>Predicción - OncoPredict</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts - Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-dark: #121212;
+            --primary-color: #1e1e1e;
+            --secondary-color: #2d2d2d;
+            --accent-color: #3a86ff;
+            --accent-dark: #2667cc;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --white: #ffffff;
+            --black: #000000;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --border-radius: 8px;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --sidebar-width: 280px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--primary-dark);
+            font-weight: 400;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--primary-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 2rem 1.5rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 1000;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-left: 0.8rem;
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .nav-menu li a:hover {
+            background-color: var(--secondary-color);
+            color: var(--text-primary);
+        }
+
+        .nav-menu li a.active {
+            background-color: rgba(58, 134, 255, 0.2);
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .nav-menu li a i {
+            width: 24px;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .nav-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 1.5rem 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2.5rem;
+            max-width: 1200px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 1rem;
+            cursor: pointer;
+        }
+
+        /* Flash Messages */
+        .flash-messages {
+            margin-bottom: 1.5rem;
+        }
+
+        .flash-message {
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: var(--border-radius);
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--danger-color);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .flash-message i {
+            font-size: 1.1rem;
+        }
+
+        /* Option Buttons */
+        .option-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-btn {
+            padding: 1rem 1.5rem;
+            background-color: var(--secondary-color);
+            color: var(--text-primary);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transition);
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .option-btn:hover,
+        .option-btn.active {
+            background-color: var(--accent-color);
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(58, 134, 255, 0.2);
+        }
+
+        /* Form Sections */
+        .form-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+            background-color: var(--primary-color);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-section.active {
+            display: block;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-weight: 500;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        label i {
+            color: var(--accent-color);
+            width: 20px;
+            text-align: center;
+        }
+
+        input,
+        select {
+            padding: 0.8rem 1rem;
+            background-color: var(--secondary-color);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(58, 134, 255, 0.2);
+        }
+
+        button[type="submit"] {
+            background: var(--accent-color);
+            color: var(--white);
+            padding: 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        button[type="submit"]:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(58, 134, 255, 0.3);
+        }
+
+        /* File Upload */
+        .file-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 2.5rem;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            text-align: center;
+            transition: var(--transition);
+            background-color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .file-upload:hover {
+            border-color: var(--accent-color);
+            background-color: rgba(58, 134, 255, 0.05);
+        }
+
+        .file-upload i {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+        }
+
+        .file-upload p {
+            color: var(--text-secondary);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .file-upload-label {
+            background: var(--accent-color);
+            color: var(--white);
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-upload-label:hover {
+            background: var(--accent-dark);
+        }
+
+        #file-name {
+            color: var(--accent-color);
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        /* Result Section */
+        .resultado {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .resultado i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .resultado.positivo {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--danger-color);
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .resultado.negativo {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success-color);
+            border-left: 4px solid var(--success-color);
+        }
+
+        .resultado p {
+            color: inherit;
+            font-size: 1rem;
+            font-weight: normal;
+            margin-top: 0.5rem;
+        }
+
+
+        /* Footer */
+        .footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            color: var(--white);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .footer-section a {
+            color: var(--text-secondary);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a:hover {
+            color: var(--accent-color);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 300px;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .option-buttons {
+                flex-direction: column;
+            }
+
+            .option-btn {
+                width: 100%;
+            }
+
+            .form-section {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Toggle button for mobile */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1100;
+        }
+
+        @media (max-width: 992px) {
+            .menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">OP</div>
+            <h1>OncoPredict</h1>
+        </div>
+
+        <nav>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index')}}"><i class="fas fa-home"></i>Inicio</a></li>
+                <li><a href="{{ url_for('estadisticas') }}"><i class="fas fa-chart-bar"></i>Estadísticas</a></li>
+                <li><a href="{{ url_for('prediccion') }}" class="active"><i class="fas fa-robot"></i>Predicción</a></li>
+                <li><a href="{{ url_for('modelos')}}"><i class="fas fa-brain"></i>Modelos</a></li>
+
+                <li class="nav-divider"></li>
+                <li><a href="{{ url_for('equipo')}}"><i class="fas fa-users"></i>Equipo</a></li>
+
+
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Predicción de Cáncer de Pulmón</h1>
+            <div class="user-profile">
+                <span>Equipo 1</span>
+
+            </div>
+        </div>
+
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+            <div class="flash-message">
+                <i class="fas fa-exclamation-circle"></i> {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="option-buttons">
+            <button class="option-btn active" onclick="showForm('form-section')">
+                <i class="fas fa-user-md"></i> Datos Clínicos
+            </button>
+            <button class="option-btn" onclick="showForm('image-section')">
+                <i class="fas fa-x-ray"></i> Imagen Médica
+            </button>
+        </div>
+
+        <!-- Formulario de datos clínicos -->
+        <div id="form-section" class="form-section active">
+            <form method="POST" action="{{ url_for('prediccion') }}">
+                <input type="hidden" name="prediction_type" value="form">
+
+                <div class="form-group">
+                    <label for="gender"><i class="fas fa-venus-mars"></i> Género:</label>
+                    <select name="gender" id="gender" required>
+                        <option value="">Seleccione su género</option>
+                        <option value="M">Masculino</option>
+                        <option value="F">Femenino</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="age"><i class="fas fa-birthday-cake"></i> Edad:</label>
+                    <input type="number" name="age" id="age" required min="1" max="120" placeholder="Ingrese su edad">
+                </div>
+
+                {% set campos = [
+                ('smoking', 'smoking', '¿Fuma actualmente?', 'fas fa-smoking'),
+                ('yellow_fingers', 'yellow_fingers', '¿Tiene los dedos amarillentos?', 'fas fa-hand-paper'),
+                ('anxiety', 'anxiety', '¿Experimenta ansiedad frecuente?', 'fas fa-brain'),
+                ('peer_pressure', 'peer_pressure', '¿Siente presión social para fumar?', 'fas fa-users'),
+                ('chronic_disease', 'chronic_disease', '¿Tiene alguna enfermedad crónica?', 'fas fa-heartbeat'),
+                ('fatigue', 'fatigue', '¿Experimenta fatiga frecuente?', 'fas fa-tired'),
+                ('allergy', 'allergy', '¿Tiene alergias conocidas?', 'fas fa-allergies'),
+                ('wheezing', 'wheezing', '¿Presenta sibilancias al respirar?', 'fas fa-lungs'),
+                ('alcohol_consuming', 'alcohol_consuming', '¿Consume alcohol regularmente?', 'fas fa-wine-glass-alt'),
+                ('coughing', 'coughing', '¿Tiene tos persistente?', 'fas fa-head-side-cough'),
+                ('shortness_of_breath', 'shortness_of_breath', '¿Experimenta dificultad para respirar?', 'fas fa-wind'),
+                ('swallowing_difficulty', 'swallowing_difficulty', '¿Tiene dificultad para tragar?', 'fas fa-utensils'),
+                ('chest_pain', 'chest_pain', '¿Experimenta dolor en el pecho?', 'fas fa-heart')
+                ] %}
+
+                {% for id, name, pregunta, icon in campos %}
+                <div class="form-group">
+                    <label for="{{ id }}"><i class="{{ icon }}"></i> {{ pregunta }}</label>
+                    <select name="{{ name }}" id="{{ id }}" required>
+                        <option value="">Seleccione una opción</option>
+                        <option value="yes">Sí</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+                {% endfor %}
+
+                <button type="submit">
+                    <i class="fas fa-stethoscope"></i> Realizar Predicción
+                </button>
+            </form>
+        </div>
+
+        <!-- Formulario para imágenes médicas -->
+        <div id="image-section" class="form-section">
+            <form method="POST" action="{{ url_for('prediccion') }}" enctype="multipart/form-data">
+                <input type="hidden" name="prediction_type" value="image">
+
+                <div class="file-upload">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Suba una imagen de radiografía de tórax para análisis (formatos JPG, PNG)</p>
+                    <label for="radiografia" class="file-upload-label">
+                        <i class="fas fa-folder-open"></i> Seleccionar imagen
+                    </label>
+                    <input type="file" id="radiografia" name="radiografia" accept="image/png, image/jpeg" required>
+                    <p id="file-name"></p>
+                </div>
+
+                <button type="submit">
+                    <i class="fas fa-search"></i> Analizar Imagen
+                </button>
+            </form>
+        </div>
+
+        <!-- Resultado de la predicción -->
+        {% if diagnostico %}
+        <div class="resultado {{ 'positivo' if diagnostico == 'Positivo' else 'negativo' }}">
+            <i class="fas fa-{{ 'exclamation-triangle' if diagnostico == 'Positivo' else 'check-circle' }}"></i>
+            Resultado de la predicción: <strong>{{ diagnostico }}</strong>
+            {% if diagnostico == 'Positivo' %}
+            <p>
+                Recomendamos consultar con un especialista médico.
+            </p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <footer class="footer">
+            <div class="footer-container">
+                <div class="footer-section">
+                    <h3>Proyecto BigData</h3>
+                    <p>Investigación avanzada en diagnóstico asistido por IA para cáncer de pulmón.</p>
+                    <a href="{{ url_for('estadisticas') }}">Ver estadísticas</a>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Contacto</h3>
+                    <a href="mailto:investigacion@bigdatahealth.org"><i class="fas fa-envelope"></i>
+                        investigacion@bigdatahealth.org</a>
+                    <a href="tel:+524499105002"><i class="fas fa-phone"></i> +52 449 910 5002</a>
+                    <a href="https://maps.google.com/?q=Av.+Adolfo+López+Mateos+Ote.+1801,+Aguascalientes"
+                        target="_blank">
+                        <i class="fas fa-map-marker-alt"></i> Ubicación
+                    </a>
+                </div>
+
+
+            </div>
+
+            <p class="copyright">&copy; 2025 Proyecto BigData. Todos los derechos reservados.</p>
+        </footer>
+    </main>
+
+    <script>
+        // Mobile menu toggle functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 992) {
+                if (!sidebar.contains(e.target) && e.target !== menuToggle) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // Show selected form section
+        function showForm(sectionId) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Mostrar la sección seleccionada
+            document.getElementById(sectionId).classList.add('active');
+
+            // Actualizar botones activos
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        // Mostrar nombre del archivo seleccionado
+        document.getElementById('radiografia')?.addEventListener('change', function (e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'Ningún archivo seleccionado';
+            document.getElementById('file-name').textContent = fileName;
+        });
+
+        // Validación de edad
+        document.getElementById('age')?.addEventListener('input', function (e) {
+            if (e.target.value < 1) e.target.value = 1;
+            if (e.target.value > 120) e.target.value = 120;
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Resultado de la predicción de cáncer de pulmón basado en análisis de imágenes médicas o datos clínicos">
+    <title>Resultado - OncoPredict</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts - Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-dark: #121212;
+            --primary-color: #1e1e1e;
+            --secondary-color: #2d2d2d;
+            --accent-color: #3a86ff;
+            --accent-dark: #2667cc;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --white: #ffffff;
+            --black: #000000;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196f3;
+            --border-radius: 8px;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --sidebar-width: 280px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--primary-dark);
+            font-weight: 400;
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--primary-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 2rem 1.5rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 1000;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-header h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-left: 0.8rem;
+        }
+        
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .nav-menu {
+            list-style: none;
+        }
+        
+        .nav-menu li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+        
+        .nav-menu li a:hover {
+            background-color: var(--secondary-color);
+            color: var(--text-primary);
+        }
+        
+        .nav-menu li a.active {
+            background-color: rgba(58, 134, 255, 0.2);
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+        
+        .nav-menu li a i {
+            width: 24px;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        
+        .nav-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 1.5rem 0;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2.5rem;
+            max-width: 1200px;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 1rem;
+            cursor: pointer;
+        }
+        
+        /* Result Container */
+        .result-container {
+            background-color: var(--primary-color);
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .result-title {
+            color: var(--white);
+            margin-bottom: 2rem;
+            font-size: 1.6rem;
+            position: relative;
+            padding-bottom: 1rem;
+            font-weight: 500;
+        }
+        
+        .result-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 3px;
+        }
+        
+        /* Diagnosis Result */
+        .result-diagnosis {
+            font-size: 1.6rem;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin: 2rem 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            border-left: 4px solid;
+            transition: var(--transition);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.6s forwards 0.3s;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .positive {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: var(--danger-color);
+            border-left-color: var(--danger-color);
+        }
+        
+        .negative {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: var(--success-color);
+            border-left-color: var(--success-color);
+        }
+        
+        .normal {
+            background-color: rgba(33, 150, 243, 0.1);
+            color: var(--info-color);
+            border-left-color: var(--info-color);
+        }
+        
+        /* Result Details */
+        .result-details {
+            background-color: var(--secondary-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin: 2rem 0;
+            text-align: center;
+            border-left: 4px solid var(--accent-color);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.6s forwards 0.5s;
+        }
+        
+        .result-details p {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+        
+        .result-details p:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Method Badge */
+        .method-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background-color: var(--accent-color);
+            color: var(--white);
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            margin-top: 1rem;
+            transition: var(--transition);
+            font-size: 0.95rem;
+        }
+        
+        .method-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        /* Recommendation */
+        .recommendation {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: rgba(255, 152, 0, 0.1);
+            border-left: 4px solid var(--warning-color);
+            border-radius: var(--border-radius);
+            text-align: left;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.6s forwards 0.7s;
+        }
+        
+        .recommendation h3 {
+            color: var(--warning-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .recommendation p {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+        }
+        
+        /* Image Container */
+        .result-image-container {
+            margin: 3rem 0;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.6s forwards 0.7s;
+        }
+        
+        .result-image-container h3 {
+            color: var(--white);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .result-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            cursor: zoom-in;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .result-image:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .image-caption {
+            margin-top: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* Back Button */
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 2rem;
+            padding: 1rem 2rem;
+            background: var(--accent-color);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            transition: var(--transition);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.6s forwards 0.9s;
+        }
+        
+        .btn-back:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px) !important;
+            box-shadow: var(--shadow-hover);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            overflow: auto;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .modal-content {
+            display: block;
+            max-width: 90%;
+            max-height: 90vh;
+            margin: auto;
+            margin-top: 5vh;
+            border-radius: var(--border-radius);
+            animation: zoomIn 0.3s;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.95);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+        
+        .close {
+            position: absolute;
+            top: 2rem;
+            right: 2.5rem;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            opacity: 0.8;
+        }
+        
+        .close:hover {
+            color: var(--accent-color);
+            transform: rotate(90deg);
+            opacity: 1;
+        }
+        
+        .modal-caption {
+            color: white;
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 300px;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1.5rem;
+            }
+            
+            .result-container {
+                padding: 1.5rem;
+            }
+            
+            .result-diagnosis {
+                font-size: 1.3rem;
+                padding: 1rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .result-title {
+                font-size: 1.4rem;
+            }
+            
+            .modal-content {
+                max-width: 95%;
+            }
+            
+            .close {
+                top: 1.5rem;
+                right: 1.5rem;
+                font-size: 2rem;
+            }
+            
+            .btn-back {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        /* Toggle button for mobile */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1100;
+        }
+        
+        @media (max-width: 992px) {
+            .menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">OP</div>
+            <h1>OncoPredict</h1>
+        </div>
+        
+        <nav>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index')}}"><i class="fas fa-home"></i>Inicio</a></li>
+                <li><a href="{{ url_for('estadisticas') }}"><i class="fas fa-chart-bar"></i>Estadísticas</a></li>
+                <li><a href="{{ url_for('prediccion') }}" class="active"><i class="fas fa-robot"></i>Predicción</a></li>
+                <li><a href="{{ url_for('modelos')}}"><i class="fas fa-brain"></i>Modelos</a></li>
+                
+                <li class="nav-divider"></li>
+                
+            
+                <li><a href="{{ url_for('equipo')}}"><i class="fas fa-users"></i>Equipo</a></li>
+            </ul>
+        </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Resultado de la Predicción</h1>
+            <div class="user-profile">
+                <span>Equipo 1</span>
+                <div class="user-avatar">
+                    <i class="fas fa-user-md"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="result-container">
+            <h2 class="result-title">Diagnóstico de Cáncer de Pulmón</h2>
+
+            <div class="result-diagnosis {{ 'positive' if diagnostico == 'Positivo' else 'negative' if diagnostico == 'Negativo' else 'normal' }}">
+                <i class="fas fa-{{ 'exclamation-triangle' if diagnostico == 'Positivo' else 'check-circle' if diagnostico == 'Negativo' else 'info-circle' }}"></i>
+                Resultado: <strong>{{ diagnostico }}</strong>
+            </div>
+
+            <div class="result-details">
+                <p>{{ detalles }}</p>
+                <span class="method-badge">
+                    <i class="fas fa-{{ 'x-ray' if tipo_prediccion == 'imagen' else 'user-md' }}"></i>
+                    {{ 'Análisis de imagen médica' if tipo_prediccion == 'imagen' else 'Datos clínicos' }}
+                </span>
+            </div>
+
+            {% if diagnostico == 'Positivo' %}
+            <div class="recommendation">
+                <h3><i class="fas fa-exclamation-circle"></i> Recomendación:</h3>
+                <p>Este resultado sugiere la presencia de características asociadas con cáncer de pulmón. Le recomendamos
+                    encarecidamente consultar con un especialista médico para una evaluación más detallada y seguimiento
+                    adecuado. Un diagnóstico temprano puede mejorar significativamente las opciones de tratamiento y los resultados.</p>
+            </div>
+            {% endif %}
+
+            {% if tipo_prediccion == 'imagen' and imagen_path %}
+            <div class="result-image-container">
+                <h3><i class="fas fa-image"></i> Imagen analizada:</h3>
+                <img id="thumbnail" src="{{ url_for('static', filename='uploads/' + imagen_path.split('/')[-1]) }}"
+                    alt="Radiografía de tórax analizada" class="result-image">
+
+                <p class="image-caption">Haga clic en la imagen para ampliarla</p>
+
+                <!-- Modal para zoom -->
+                <div id="zoomModal" class="modal">
+                    <span class="close" aria-label="Cerrar modal">&times;</span>
+                    <img class="modal-content" id="zoomedImg" alt="Vista ampliada de la radiografía">
+                    <div class="modal-caption">Presione ESC o haga clic fuera para cerrar</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <a href="{{ url_for('prediccion') }}" class="btn-back">
+                <i class="fas fa-redo"></i> Realizar otra predicción
+            </a>
+        </div>
+    </main>
+    
+    <script>
+        // Mobile menu toggle functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 992) {
+                if (!sidebar.contains(e.target) && e.target !== menuToggle) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // Modal para zoom de imagen
+        const modal = document.getElementById("zoomModal");
+        const img = document.getElementById("thumbnail");
+        const modalImg = document.getElementById("zoomedImg");
+        const closeBtn = document.getElementsByClassName("close")[0];
+
+        // Abrir modal al hacer clic en la imagen
+        img?.addEventListener('click', function () {
+            modal.style.display = "block";
+            modalImg.src = this.src;
+            document.body.style.overflow = "hidden"; // Deshabilitar scroll
+        });
+
+        // Cerrar modal
+        closeBtn.onclick = function () {
+            modal.style.display = "none";
+            document.body.style.overflow = "auto"; // Habilitar scroll
+        };
+
+        // Cerrar al hacer clic fuera de la imagen
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+                document.body.style.overflow = "auto";
+            }
+        };
+
+        // Cerrar con tecla ESC
+        document.addEventListener('keydown', function (event) {
+            if (event.key === "Escape" && modal.style.display === "block") {
+                modal.style.display = "none";
+                document.body.style.overflow = "auto";
+            }
+        });
+    </script>
+</body>
+</html>

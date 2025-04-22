@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Información sobre el equipo de desarrollo de OncoPredict">
+    <title>Equipo - OncoPredict</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts - Montserrat para un look moderno -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-dark: #121212;
+            --primary-color: #1e1e1e;
+            --secondary-color: #2d2d2d;
+            --accent-color: #3a86ff;
+            --accent-dark: #2667cc;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --white: #ffffff;
+            --black: #000000;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --sidebar-width: 280px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--primary-dark);
+            font-weight: 400;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--primary-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 2rem 1.5rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 1000;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-left: 0.8rem;
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .nav-menu li a:hover {
+            background-color: var(--secondary-color);
+            color: var(--text-primary);
+        }
+
+        .nav-menu li a.active {
+            background-color: rgba(58, 134, 255, 0.2);
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .nav-menu li a i {
+            width: 24px;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .nav-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 1.5rem 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2.5rem;
+            max-width: 1200px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 1rem;
+            cursor: pointer;
+        }
+
+        /* Content Cards */
+        .content-card {
+            background-color: var(--primary-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: var(--white);
+        }
+
+        /* Team Section */
+        .team-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .team-member {
+            background-color: var(--secondary-color);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .team-member:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .member-photo {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .member-info {
+            padding: 1.5rem;
+        }
+
+        .member-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+        }
+
+        .member-id {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .member-id i {
+            margin-right: 0.5rem;
+            color: var(--accent-color);
+        }
+
+        .member-role {
+            background-color: rgba(58, 134, 255, 0.2);
+            color: var(--accent-color);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .member-bio {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 300px;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .team-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Toggle button for mobile */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1100;
+        }
+
+        @media (max-width: 992px) {
+            .menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">OP</div>
+            <h1>OncoPredict</h1>
+        </div>
+
+        <nav>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index')}}"><i class="fas fa-home"></i>Inicio</a></li>
+                <li><a href="{{ url_for('estadisticas') }}"><i class="fas fa-chart-bar"></i>Estadísticas</a></li>
+                <li><a href="{{ url_for('prediccion') }}"><i class="fas fa-robot"></i>Predicción</a></li>
+                <li><a href="{{ url_for('modelos')}}"><i class="fas fa-brain"></i>Modelos</a></li>
+
+                <li class="nav-divider"></li>
+
+                <li><a href="{{ url_for('equipo')}}" class="active"><i class="fas fa-users"></i>Equipo</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Nuestro Equipo</h1>
+            <div class="user-profile">
+                <span>Equipo 1</span>
+                
+            </div>
+        </div>
+
+        <div class="content-card">
+            <div class="card-header">
+                <h2 class="card-title">Desarrolladores del Proyecto</h2>
+            </div>
+
+            <p>Conoce al equipo detrás de OncoPredict, dedicado a crear soluciones innovadoras para la detección
+                temprana de cáncer de pulmón mediante inteligencia artificial.</p>
+
+            <div class="team-container">
+                <!-- Integrante 1 -->
+                <div class="team-member">
+                    <img src="/static/team1.jpg" alt="Juan Esteban Ramírez García" class="member-photo">
+                    <div class="member-info">
+                        <div class="member-name">Juan Esteban Ramírez García</div>
+                        <div class="member-id"><i class="fas fa-id-card"></i> Número de control: 21150392</div>
+                    </div>
+                </div>
+
+                <!-- Integrante 2 -->
+                <div class="team-member">
+                    <img src="/static/team2.jpg" alt="Denise Michelle Ramirez Quevedo" class="member-photo">
+                    <div class="member-info">
+                        <div class="member-name">Denise Michelle Ramirez Quevedo</div>
+                        <div class="member-id"><i class="fas fa-id-card"></i> Número de control: 21150390</div>
+
+                    </div>
+                </div>
+
+                <!-- Integrante 3 -->
+                <div class="team-member">
+                    <img src="/static/team3.jpg" alt="Horacio Noel Hevangelista González" class="member-photo">
+                    <div class="member-info">
+                        <div class="member-name">Horacio Noel Hevangelista González</div>
+                        <div class="member-id"><i class="fas fa-id-card"></i> Número de control: 21150381</div>
+                    </div>
+                </div>
+
+                <!-- Integrante 4 -->
+                <div class="team-member">
+                    <img src="/static/team4.jpg" alt="Oscar Fernando Diaz Santamaria" class="member-photo">
+                    <div class="member-info">
+                        <div class="member-name">Oscar Fernando Diaz Santamaria</div>
+                        <div class="member-id"><i class="fas fa-id-card"></i> Número de control: 21150407</div>
+                    </div>
+                </div>
+
+                <div class="team-member">
+                    <img src="/static/team5.jpg" alt="Leonel Alejandro Vivar Esparza"  class="member-photo">
+                    <div class="member-info">
+                        <div class="member-name">Leonel Alejandro Vivar Esparza</div>
+                        <div class="member-id"><i class="fas fa-id-card"></i> Número de control: 20151644</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <div class="card-header">
+                <h2 class="card-title">Sobre el Proyecto</h2>
+            </div>
+
+            <p>OncoPredict es un sistema de apoyo al diagnóstico médico que utiliza algoritmos de inteligencia
+                artificial para analizar imágenes de tomografías computarizadas y predecir la probabilidad de cáncer de
+                pulmón. Este método simplemente es una herramienta y para su correcto uso y un correcto diagnostico es preferible 
+            acudir con un medico especializado para una mayor confiabilidad.</p>
+
+
+            <p style="margin-bottom: 20px;"></p>
+            <p>
+                ESTA PAGINA USA MODELOS ENTRENADOS Y SOLO DA UNA PREDICCIÓN BASÁNDOSE EN LA INFORMACIÓN PROPORCIONADA NO TOMAR SU RESULTADO COMO COMPLETAMENTE OFICIAL</p>
+
+        
+        </div>
+    </main>
+
+    <script>
+        // Mobile menu toggle functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 992) {
+                if (!sidebar.contains(e.target) && e.target !== menuToggle) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

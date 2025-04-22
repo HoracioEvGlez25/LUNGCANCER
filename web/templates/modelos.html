@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Explicación detallada sobre Redes Neuronales Convolucionales (CNN) y Random Forest aplicados al diagnóstico de cáncer de pulmón">
+    <title>Modelos de IA - OncoPredict</title>
+
+    <!-- Font Awesome 6.4.2 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- Google Fonts - Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-dark: #121212;
+            --primary-color: #1e1e1e;
+            --secondary-color: #2d2d2d;
+            --accent-color: #3a86ff;
+            --accent-dark: #2667cc;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --white: #ffffff;
+            --black: #000000;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ff9800;
+            --info-color: #0288d1;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --sidebar-width: 280px;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--primary-dark);
+            font-weight: 400;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--primary-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 2rem 1.5rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 1000;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-left: 0.8rem;
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .nav-menu li a:hover {
+            background-color: var(--secondary-color);
+            color: var(--text-primary);
+        }
+
+        .nav-menu li a.active {
+            background-color: rgba(58, 134, 255, 0.2);
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .nav-menu li a i {
+            width: 24px;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .nav-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 1.5rem 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2.5rem;
+            max-width: 1200px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 1rem;
+            cursor: pointer;
+        }
+
+        /* Content Cards */
+        .content-card {
+            background-color: var(--primary-color);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: var(--white);
+        }
+
+        /* Typography */
+        h2 {
+            color: var(--white);
+            font-size: 1.6rem;
+            margin: 2rem 0 1.2rem;
+            font-weight: 500;
+        }
+
+        h3 {
+            color: var(--white);
+            font-size: 1.3rem;
+            margin: 1.5rem 0 1rem;
+            font-weight: 500;
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        a:hover {
+            color: var(--accent-dark);
+        }
+
+        /* Lists */
+        .feature-list {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-list li {
+            margin-bottom: 0.8rem;
+            position: relative;
+            padding-left: 1.8rem;
+            color: var(--text-secondary);
+        }
+
+        .feature-list li::before {
+            content: "▹";
+            color: var(--accent-color);
+            font-size: 1rem;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        /* Tables */
+        .model-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+
+        .model-table th,
+        .model-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .model-table th {
+            background-color: rgba(58, 134, 255, 0.1);
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .model-table tr:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background-color: var(--secondary-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: var(--white);
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Accordion */
+        .accordion {
+            margin: 1.5rem 0;
+        }
+
+        .accordion-item {
+            margin-bottom: 0.75rem;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .accordion-button {
+            width: 100%;
+            background-color: var(--secondary-color);
+            color: var(--text-primary);
+            text-align: left;
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .accordion-button:hover {
+            background-color: rgba(58, 134, 255, 0.2);
+        }
+
+        .accordion-button::after {
+            content: '+';
+            font-size: 1.25rem;
+            transition: var(--transition);
+        }
+
+        .accordion-button.active {
+            background-color: rgba(58, 134, 255, 0.2);
+        }
+
+        .accordion-button.active::after {
+            content: '-';
+        }
+
+        .accordion-content {
+            padding: 0 1.25rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            background-color: var(--primary-color);
+        }
+
+        .accordion-content.show {
+            padding: 1rem 1.25rem;
+            max-height: 1000px;
+        }
+
+        .accordion-content code {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 0.125rem 0.25rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-color);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--accent-color);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            transition: var(--transition);
+            margin: 0.5rem 0;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Images */
+        .model-image {
+            max-width: 100%;
+            height: auto;
+            margin: 1.5rem auto;
+            display: block;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            color: var(--white);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .footer-section a {
+            color: var(--text-secondary);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a:hover {
+            color: var(--accent-color);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 300px;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .user-profile {
+                margin-top: 1rem;
+            }
+        }
+
+        /* Toggle button for mobile */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1100;
+        }
+
+        @media (max-width: 992px) {
+            .menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">OP</div>
+            <h1>OncoPredict</h1>
+        </div>
+
+        <nav>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index')}}"><i class="fas fa-home"></i>Inicio</a></li>
+                <li><a href="{{ url_for('estadisticas') }}"><i class="fas fa-chart-bar"></i>Estadísticas</a></li>
+                <li><a href="{{ url_for('prediccion') }}"><i class="fas fa-robot"></i>Predicción</a></li>
+                <li><a href="{{ url_for('modelos')}}" class="active"><i class="fas fa-brain"></i>Modelos</a></li>
+                <li class="nav-divider"></li>
+                <li><a href="{{ url_for('equipo')}}"><i class="fas fa-users"></i>Equipo</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Modelos de Inteligencia Artificial</h1>
+            <div class="user-profile">
+                <span>Equipo 1</span>
+                
+            </div>
+        </div>
+
+        <!-- CNN Section -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-network-wired"></i> Redes Neuronales Convolucionales (CNN)</h2>
+            </div>
+
+
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Precisión</span>
+                    <span class="stat-number">92.5%</span>
+                    <span>Conjunto de validación</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Tiempo</span>
+                    <span class="stat-number">120ms</span>
+                    <span>Por predicción</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Imágenes</span>
+                    <span class="stat-number">1K+</span>
+                    <span>Dataset de entrenamiento</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Capas</span>
+                    <span class="stat-number">8</span>
+                    <span>Arquitectura profunda</span>
+                </div>
+            </div>
+
+            <h3>¿Cómo funcionan las CNN?</h3>
+            <p>Las Redes Neuronales Convolucionales son un tipo especializado de red neuronal artificial diseñada para
+                procesar datos con estructura de cuadrícula, como imágenes. Son fundamentales en visión por computadora
+                y diagnóstico médico por imágenes.</p>
+
+            <h3>Arquitectura de nuestro modelo</h3>
+
+            <div class="accordion">
+                <div class="accordion-item">
+                    <button class="accordion-button">
+                        <i class="fas fa-layer-group"></i> Capa 1: Entrada (224x224x3)
+                    </button>
+                    <div class="accordion-content">
+                        <p>Recibe imágenes de radiografías de tórax con tamaño 224x224 píxeles y 3 canales de color
+                            (RGB).</p>
+                        <p><strong>Preprocesamiento:</strong> Normalización de valores de píxeles a rango [0,1].</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-button">
+                        <i class="fas fa-filter"></i> Capa 2: Convolucional (32 filtros 3x3)
+                    </button>
+                    <div class="accordion-content">
+                        <ul class="feature-list">
+                            <li>32 filtros convolucionales de 3x3 píxeles</li>
+                            <li>Función de activación ReLU</li>
+                            <li>Padding 'same' para mantener dimensiones</li>
+                            <li>Detecta bordes y texturas básicas</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-button">
+                        <i class="fas fa-compress-alt"></i> Capa 3: Max Pooling (2x2)
+                    </button>
+                    <div class="accordion-content">
+                        <p>Reduce la dimensionalidad espacial tomando el valor máximo en ventanas de 2x2 píxeles.</p>
+                        <p><strong>Beneficios:</strong></p>
+                        <ul class="feature-list">
+                            <li>Disminuye la cantidad de parámetros</li>
+                            <li>Hace el modelo más invariante a pequeñas traslaciones</li>
+                            <li>Reduce el riesgo de sobreajuste</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-button">
+                        <i class="fas fa-filter"></i> Capa 4: Convolucional (64 filtros 3x3)
+                    </button>
+                    <div class="accordion-content">
+                        <ul class="feature-list">
+                            <li>64 filtros para detectar patrones más complejos</li>
+                            <li>Kernel de 3x3 con activación ReLU</li>
+                            <li>Capaz de identificar estructuras pulmonares</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-button">
+                        <i class="fas fa-compress-alt"></i> Capa 5: Max Pooling (2x2)
+                    </button>
+                    <div class="accordion-content">
+                        <p>Segunda capa de reducción para abstraer características más globales.</p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-button">
+                        <i class="fas fa-vector-square"></i> Capa 6: Flatten
+                    </button>
+                    <div class="accordion-content">
+                        <p>Transforma los mapas de características 2D en un vector 1D para conectar con capas densas.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-button">
+                        <i class="fas fa-project-diagram"></i> Capa 7: Densa (128 neuronas)
+                    </button>
+                    <div class="accordion-content">
+                        <ul class="feature-list">
+                            <li>64 neuronas con activación ReLU</li>
+                            <li>Dropout del 30% para regularización</li>
+                            <li>Combina características para la clasificación</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <button class="accordion-button">
+                        <i class="fas fa-bullseye"></i> Capa 8: Salida (3 neuronas)
+                    </button>
+                    <div class="accordion-content">
+                        <ul class="feature-list">
+                            <li>3 neuronas (Maligno, Benigno, Normal)</li>
+                            <li>Activación Softmax para probabilidades</li>
+                            <li>Función de pérdida: Categorical Crossentropy</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <a href="https://www.ibm.com/mx-es/think/topics/convolutional-neural-networks" class="btn" target="_blank"
+                rel="noopener noreferrer">
+                <i class="fas fa-book"></i> Más sobre CNN
+            </a>
+        </div>
+
+        <!-- Random Forest Section -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-tree"></i> Random Forest</h2>
+            </div>
+
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Precisión</span>
+                    <span class="stat-number">89.2%</span>
+                    <span>Conjunto de prueba</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Árboles</span>
+                    <span class="stat-number">100</span>
+                    <span>En el ensamble</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Características</span>
+                    <span class="stat-number">25</span>
+                    <span>Analizadas</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">F1-Score</span>
+                    <span class="stat-number">88.3%</span>
+                    <span>Balance precisión-recall</span>
+                </div>
+            </div>
+
+            <h3>Implementación en nuestro proyecto</h3>
+
+            <div class="feature-grid">
+                <div class="stat-card">
+                    <h4><i class="fas fa-database"></i> Datos utilizados</h4>
+                    <ul class="feature-list">
+                        <li>Edad y género del paciente</li>
+                        <li>Historial de tabaquismo</li>
+                        <li>Síntomas respiratorios</li>
+                        <li>Factores de riesgo</li>
+                    </ul>
+                </div>
+
+                <div class="stat-card">
+                    <h4><i class="fas fa-tachometer-alt"></i> Configuración</h4>
+                    <ul class="feature-list">
+                        <li>100 árboles de decisión</li>
+                        <li>Profundidad máxima: 10 niveles</li>
+                        <li>Criterio: Entropía</li>
+                        <li>Muestreo bootstrap activado</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Resultados comparativos</h3>
+
+            <table class="model-table">
+                <thead>
+                    <tr>
+                        <th>Métrica</th>
+                        <th>Random Forest</th>
+                        <th>Árbol Simple</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Precisión</td>
+                        <td>89.2%</td>
+                        <td>82.1%</td>
+                    </tr>
+                    <tr>
+                        <td>Recall</td>
+                        <td>87.5%</td>
+                        <td>80.3%</td>
+                    </tr>
+                    <tr>
+                        <td>F1-Score</td>
+                        <td>88.3%</td>
+                        <td>81.2%</td>
+                    </tr>
+                    <tr>
+                        <td>Tiempo entrenamiento</td>
+                        <td>45 segundos</td>
+                        <td>2 segundos</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Importancia de características</h3>
+            <p>Nuestro análisis de importancia de características reveló que los principales predictores son:</p>
+            <ul class="feature-list">
+                <li>Edad del paciente (mayor riesgo después de 50 años)</li>
+                <li>Historial de tabaquismo (años y cantidad)</li>
+                <li>Presencia de tos crónica</li>
+                <li>Dificultad para respirar</li>
+            </ul>
+
+            <a href="https://www.ibm.com/mx-es/think/topics/random-forest" class="btn" target="_blank"
+                rel="noopener noreferrer">
+                <i class="fas fa-book"></i> Más sobre Random Forest
+            </a>
+        </div>
+
+        <!-- Comparison Section -->
+        <div class="content-card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-balance-scale"></i> Comparación de Modelos</h2>
+            </div>
+
+            <h3>Enfoque híbrido</h3>
+            <p>En nuestro sistema combinamos ambos modelos para obtener diagnósticos más completos:</p>
+            <ul class="feature-list">
+                <li>Random Forest analiza los datos clínicos del paciente</li>
+                <li>CNN procesa las imágenes médicas</li>
+                <li>Un algoritmo de fusión combina ambos resultados</li>
+                <li>Genera una recomendación final con nivel de confianza</li>
+            </ul>
+            <div class="feature-grid">
+                <div class="stat-card">
+                    <h4><i class="fas fa-robot"></i> CNN (Imágenes)</h4>
+                    <ul class="feature-list">
+                        <li><strong>Ventaja:</strong> Excelente para patrones visuales complejos</li>
+                        <li><strong>Limitación:</strong> Requiere gran cantidad de imágenes etiquetadas</li>
+                        <li><strong>Uso ideal:</strong> Análisis de radiografías y tomografías</li>
+                    </ul>
+                </div>
+
+                <div class="stat-card">
+                    <h4><i class="fas fa-tree"></i> Random Forest (Datos)</h4>
+                    <ul class="feature-list">
+                        <li><strong>Ventaja:</strong> Funciona bien con pocos datos</li>
+                        <li><strong>Limitación:</strong> Menos preciso con patrones complejos</li>
+                        <li><strong>Uso ideal:</strong> Evaluación de riesgo basada en historial clínico</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-container">
+                <div class="footer-section">
+                    <h3>Proyecto BigData</h3>
+                    <p>Investigación avanzada en diagnóstico asistido por IA para cáncer de pulmón.</p>
+                    <a href="{{ url_for('estadisticas') }}">Ver estadísticas</a>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Contacto</h3>
+                    <a href="mailto:investigacion@bigdatahealth.org"><i class="fas fa-envelope"></i>
+                        investigacion@bigdatahealth.org</a>
+                    <a href="tel:+524499105002"><i class="fas fa-phone"></i> +52 449 910 5002</a>
+                    <a href="https://maps.google.com/?q=Av.+Adolfo+López+Mateos+Ote.+1801,+Aguascalientes"
+                        target="_blank">
+                        <i class="fas fa-map-marker-alt"></i> Ubicación
+                    </a>
+                </div>
+
+                
+            </div>
+
+            <p class="copyright">&copy; 2025 Proyecto BigData. Todos los derechos reservados.</p>
+        </footer>
+    </main>
+
+    <script>
+        // Mobile menu toggle functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 992) {
+                if (!sidebar.contains(e.target) && e.target !== menuToggle) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // Accordion functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const accordionButtons = document.querySelectorAll('.accordion-button');
+
+            accordionButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const content = this.nextElementSibling;
+                    const isExpanded = this.classList.contains('active');
+
+                    // Close all accordion items
+                    document.querySelectorAll('.accordion-content').forEach(item => {
+                        item.classList.remove('show');
+                    });
+                    document.querySelectorAll('.accordion-button').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+
+                    // Open clicked one if it was closed
+                    if (!isExpanded) {
+                        this.classList.add('active');
+                        content.classList.add('show');
+                    }
+                });
+
+                // Keyboard accessibility
+                button.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.click();
+                    }
+                });
+            });
+
+            // Animation on scroll
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = 1;
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.stat-card, .content-card').forEach(el => {
+                el.style.opacity = 0;
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+
+</html>

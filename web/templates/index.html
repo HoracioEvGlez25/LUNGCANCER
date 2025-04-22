@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Información clínica sobre cáncer de pulmón">
+    <title>OncoPredict - Cáncer de Pulmón</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts - Montserrat para un look moderno -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-dark: #121212;
+            --primary-color: #1e1e1e;
+            --secondary-color: #2d2d2d;
+            --accent-color: #3a86ff;
+            --accent-dark: #2667cc;
+            --text-primary: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --white: #ffffff;
+            --black: #000000;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --sidebar-width: 280px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--primary-dark);
+            font-weight: 400;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--primary-color);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 2rem 1.5rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 1000;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--white);
+            margin-left: 0.8rem;
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-menu li a {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .nav-menu li a:hover {
+            background-color: var(--secondary-color);
+            color: var(--text-primary);
+        }
+
+        .nav-menu li a.active {
+            background-color: rgba(58, 134, 255, 0.2);
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .nav-menu li a i {
+            width: 24px;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .nav-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 1.5rem 0;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2.5rem;
+            max-width: 1200px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 1rem;
+            cursor: pointer;
+        }
+
+        /* Content Cards */
+        .content-card {
+            background-color: var(--primary-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: var(--white);
+        }
+
+        /* Typography */
+        h2 {
+            color: var(--white);
+            font-size: 1.6rem;
+            margin: 2rem 0 1.2rem;
+            font-weight: 500;
+        }
+
+        h3 {
+            color: var(--white);
+            font-size: 1.3rem;
+            margin: 1.5rem 0 1rem;
+            font-weight: 500;
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        a:hover {
+            color: var(--accent-dark);
+        }
+
+        /* Lists */
+        .medical-list {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .medical-list li {
+            margin-bottom: 0.8rem;
+            position: relative;
+            padding-left: 1.8rem;
+            color: var(--text-secondary);
+        }
+
+        .medical-list li::before {
+            content: "▹";
+            color: var(--accent-color);
+            font-size: 1rem;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        /* Tables */
+        .medical-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+
+        .medical-table th,
+        .medical-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .medical-table th {
+            background-color: rgba(58, 134, 255, 0.1);
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+
+        .medical-table tr:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+
+        .stat-card {
+            background-color: var(--secondary-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: var(--white);
+            display: block;
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Images */
+        .medical-image {
+            max-width: 100%;
+            height: auto;
+            margin: 1.5rem auto;
+            display: block;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+
+        /* Footer */
+        .footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            color: var(--white);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .footer-section a {
+            color: var(--text-secondary);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a:hover {
+            color: var(--accent-color);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 300px;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .user-profile {
+                margin-top: 1rem;
+            }
+        }
+
+        /* Toggle button for mobile */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1100;
+        }
+
+        @media (max-width: 992px) {
+            .menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">OP</div>
+            <h1>OncoPredict</h1>
+        </div>
+
+        <nav>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index')}}" class="active"><i class="fas fa-home"></i>Inicio</a></li>
+                <li><a href="{{ url_for('estadisticas') }}"><i class="fas fa-chart-bar"></i>Estadísticas</a></li>
+                <li><a href="{{ url_for('prediccion') }}"><i class="fas fa-robot"></i>Predicción</a></li>
+                <li><a href="{{ url_for('modelos')}}"><i class="fas fa-brain"></i>Modelos</a></li>
+
+                <li class="nav-divider"></li>
+
+
+                <li><a href="{{ url_for('equipo')}}"><i class="fas fa-users"></i>Equipo</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Cáncer de Pulmón: Panorama Clínico</h1>
+            <div class="user-profile">
+                <span>Equipo 1</span>
+            </div>
+        </div>
+
+
+        <div class="content-card">
+            <div class="card-header">
+                <h2 class="card-title">Definición y Clasificación</h2>
+            </div>
+
+            <img src="/static/LUNGG.jpg" alt="Anatomía pulmonar" class="medical-image">
+
+            <p>El carcinoma pulmonar constituye una neoplasia maligna epitelial originada en el parénquima pulmonar o en
+                los bronquios, caracterizada por proliferación celular autónoma con capacidad invasiva y metastásica.
+            </p>
+
+            <h3>Clasificación Histológica (OMS 2021)</h3>
+            <ul class="medical-list">
+                <li><strong>Carcinoma de células no pequeñas (NSCLC):</strong> 85% de casos. Subclasificación:
+                    Adenocarcinoma (40%), Carcinoma escamoso (25-30%), Carcinoma de células grandes (10-15%)</li>
+                <li><strong>Carcinoma de células pequeñas (SCLC):</strong> 15% de casos. Alto grado de malignidad con
+                    metástasis precoces</li>
+                <li><strong>Tumores neuroendocrinos:</strong> Carcinoide típico/atípico (1-2%)</li>
+            </ul>
+        </div>
+
+        <div class="content-card">
+            <div class="card-header">
+                <h2 class="card-title">Factores de Riesgo</h2>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-label">Principal factor</span>
+                    <span class="stat-number">85%</span>
+                    <span>Relacionados con tabaquismo</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Mortalidad global</span>
+                    <span class="stat-number">1.8M</span>
+                    <span>Muertes anuales</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Supervivencia</span>
+                    <span class="stat-number">18%</span>
+                    <span>A 5 años</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Diagnóstico tardío</span>
+                    <span class="stat-number">65%</span>
+                    <span>Etapa III/IV al diagnóstico</span>
+                </div>
+            </div>
+
+            <h3>Factores de Riesgo Principales</h3>
+            <table class="medical-table">
+                <thead>
+                    <tr>
+                        <th>Factor</th>
+                        <th>Odds Ratio</th>
+                        <th>Notas Clínicas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Tabaquismo activo</td>
+                        <td>15-30x</td>
+                        <td>Relación dosis-duración. 20 paq/año = riesgo significativo</td>
+                    </tr>
+                    <tr>
+                        <td>Exposición a radón</td>
+                        <td>8-10x</td>
+                        <td>Segunda causa en no fumadores. Niveles >100 Bq/m³</td>
+                    </tr>
+                    <tr>
+                        <td>Asbesto</td>
+                        <td>5x</td>
+                        <td>Latencia 20-30 años. Sinergismo con tabaco (50x)</td>
+                    </tr>
+                    <tr>
+                        <td>Contaminación PM2.5</td>
+                        <td>1.2-1.5x</td>
+                        <td>10μg/m³ incrementa riesgo 9%</td>
+                    </tr>
+                    <tr>
+                        <td>Antecedentes familiares</td>
+                        <td>1.7-2x</td>
+                        <td>Polimorfismos EGFR, KRAS, TP53</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="content-card">
+            <div class="card-header">
+                <h2 class="card-title">Manifestaciones Clínicas</h2>
+            </div>
+
+            <img src="/static/LUNNNNNNNNNNNNNNNNNNNG.jpeg" alt="Comparación pulmón sano vs. canceroso"
+                class="medical-image" style="max-width: 600px;">
+
+            <h3>Síntomas Cardinales</h3>
+            <ul class="medical-list">
+                <li><strong>Tos persistente:</strong> Presente en 50-75% casos. Cambio en patrón de tos crónica en
+                    fumadores es signo de alarma</li>
+                <li><strong>Hemoptisis:</strong> Desde estrías hemoptoicas hasta hemorragia masiva. Presente en 25-50%
+                </li>
+                <li><strong>Disnea:</strong> Progresiva, por obstrucción bronquial, derrame pleural o linfangitis
+                    carcinomatosa</li>
+                <li><strong>Dolor torácico:</strong> Sordo, persistente, de localización variable. Sugiere invasión
+                    parietal o metastásica</li>
+                <li><strong>Síndrome constitucional:</strong> Pérdida de peso >10%, astenia, anorexia en enfermedad
+                    avanzada</li>
+            </ul>
+
+            <h3>Síndromes Paraneoplásicos (10-20% casos)</h3>
+            <ul class="medical-list">
+                <li>SIADH (SCLC)</li>
+                <li>Síndrome de Cushing ectópico</li>
+                <li>Síndrome de Eaton-Lambert</li>
+                <li>Hipercalcemia (PTHrP en carcinoma escamoso)</li>
+                <li>Trombosis venosa (Síndrome de Trousseau)</li>
+            </ul>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-container">
+                <div class="footer-section">
+                    <h3>Proyecto BigData</h3>
+                    <p>Investigación avanzada en diagnóstico asistido por IA para cáncer de pulmón.</p>
+                    <a href="{{ url_for('estadisticas') }}">Ver estadísticas</a>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Contacto</h3>
+                    <a href="mailto:investigacion@bigdatahealth.org"><i class="fas fa-envelope"></i>
+                        investigacion@bigdatahealth.org</a>
+                    <a href="tel:+524499105002"><i class="fas fa-phone"></i> +52 449 910 5002</a>
+                    <a href="https://maps.google.com/?q=Av.+Adolfo+López+Mateos+Ote.+1801,+Aguascalientes"
+                        target="_blank">
+                        <i class="fas fa-map-marker-alt"></i> Ubicación
+                    </a>
+                </div>
+
+
+            </div>
+
+            <p class="copyright">&copy; 2025 Proyecto BigData. Todos los derechos reservados.</p>
+        </footer>
+    </main>
+
+    <script>
+        // Mobile menu toggle functionality
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 992) {
+                if (!sidebar.contains(e.target) && e.target !== menuToggle) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

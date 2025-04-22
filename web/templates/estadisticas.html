@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Estadísticas y análisis sobre predicción de cáncer de pulmón">
+  <title>Estadísticas - OncoPredict</title>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Google Fonts - Montserrat para un look moderno -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --primary-dark: #121212;
+      --primary-color: #1e1e1e;
+      --secondary-color: #2d2d2d;
+      --accent-color: #3a86ff;
+      --accent-dark: #2667cc;
+      --text-primary: #e0e0e0;
+      --text-secondary: #b0b0b0;
+      --white: #ffffff;
+      --black: #000000;
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      line-height: 1.7;
+      color: var(--text-primary);
+      background-color: var(--primary-dark);
+      font-weight: 400;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--primary-color);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      padding: 2rem 1.5rem;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      z-index: 1000;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-header h1 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--white);
+      margin-left: 0.8rem;
+    }
+
+    .sidebar-logo {
+      width: 40px;
+      height: 40px;
+      background-color: var(--accent-color);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    .nav-menu {
+      list-style: none;
+    }
+
+    .nav-menu li {
+      margin-bottom: 0.5rem;
+    }
+
+    .nav-menu li a {
+      display: flex;
+      align-items: center;
+      padding: 0.8rem 1rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: 6px;
+      transition: var(--transition);
+    }
+
+    .nav-menu li a:hover {
+      background-color: var(--secondary-color);
+      color: var(--text-primary);
+    }
+
+    .nav-menu li a.active {
+      background-color: rgba(58, 134, 255, 0.2);
+      color: var(--accent-color);
+      font-weight: 500;
+    }
+
+    .nav-menu li a i {
+      width: 24px;
+      margin-right: 0.8rem;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .nav-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 1.5rem 0;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      padding: 2.5rem;
+      max-width: 1200px;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .page-title {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--white);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--secondary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 1rem;
+      cursor: pointer;
+    }
+
+    /* Content Cards */
+    .content-card {
+      background-color: var(--primary-color);
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .card-title {
+      font-size: 1.4rem;
+      font-weight: 500;
+      color: var(--white);
+    }
+
+    /* Typography */
+    h2 {
+      color: var(--white);
+      font-size: 1.6rem;
+      margin: 2rem 0 1.2rem;
+      font-weight: 500;
+    }
+
+    h3 {
+      color: var(--white);
+      font-size: 1.3rem;
+      margin: 1.5rem 0 1rem;
+      font-weight: 500;
+    }
+
+    h4 {
+      color: var(--accent-color);
+      margin: 1.5rem 0 1rem;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    p {
+      margin-bottom: 1.2rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    a {
+      color: var(--accent-color);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    a:hover {
+      color: var(--accent-dark);
+    }
+
+    /* Lists */
+    .medical-list {
+      list-style: none;
+      margin-bottom: 1.5rem;
+    }
+
+    .medical-list li {
+      margin-bottom: 0.8rem;
+      position: relative;
+      padding-left: 1.8rem;
+      color: var(--text-secondary);
+    }
+
+    .medical-list li::before {
+      content: "▹";
+      color: var(--accent-color);
+      font-size: 1rem;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    /* Images */
+    .medical-image {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 1.5rem auto;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+
+    /* Footer */
+    .footer {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .footer-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+    }
+
+    .footer-section h3 {
+      color: var(--white);
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+
+    .footer-section a {
+      color: var(--text-secondary);
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-section a:hover {
+      color: var(--accent-color);
+    }
+
+    .copyright {
+      margin-top: 2rem;
+      text-align: center;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 300px;
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 1.5rem;
+      }
+    }
+
+    /* Toggle button for mobile */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 1100;
+    }
+
+    @media (max-width: 992px) {
+      .menu-toggle {
+        display: block;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Mobile Menu Toggle -->
+  <button class="menu-toggle" id="menuToggle">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">OP</div>
+      <h1>OncoPredict</h1>
+    </div>
+
+    <nav>
+      <ul class="nav-menu">
+        <li><a href="{{ url_for('index')}}"><i class="fas fa-home"></i>Inicio</a></li>
+        <li><a href="{{ url_for('estadisticas') }}" class="active"><i class="fas fa-chart-bar"></i>Estadísticas</a></li>
+        <li><a href="{{ url_for('prediccion') }}"><i class="fas fa-robot"></i>Predicción</a></li>
+        <li><a href="{{ url_for('modelos')}}"><i class="fas fa-brain"></i>Modelos</a></li>
+
+        <li class="nav-divider"></li>
+
+        <li><a href="{{ url_for('equipo')}}"><i class="fas fa-users"></i>Equipo/a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content" id="main-content">
+    <div class="page-header">
+      <h1 class="page-title">Estadísticas de los Modelos de Prediccion</h1>
+      <div class="user-profile">
+        <span>Equipo 1</span>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="card-header">
+        <h2 class="card-title">Matriz de Confusión Para el Modelo CNN</h2>
+      </div>
+
+      <img src="/static/matriz_confusion.jpg" alt="Matriz de confusión del modelo CNN" class="medical-image">
+
+      <p>
+        La <strong>matriz de confusión</strong> es una herramienta fundamental para evaluar el rendimiento de nuestro
+        modelo de predicción de cáncer de pulmón mediante el análisis de imágenes de tumores. Esta representación visual
+        compara las clasificaciones reales con las predicciones del modelo, permitiendo una evaluación detallada de su
+        precisión.
+      </p>
+
+      <h3>Interpretación de la matriz</h3>
+      <ul class="medical-list">
+        <li><strong>Eje X (horizontal):</strong> Muestra las <strong>clases predichas</strong> por el modelo (Benigno,
+          Maligno, Normal).</li>
+        <li><strong>Eje Y (vertical):</strong> Representa las <strong>clases reales</strong> de las imágenes.</li>
+        <li><strong>Diagonal principal:</strong> Indica las predicciones correctas. Valores altos aquí muestran buen
+          rendimiento.</li>
+        <li><strong>Fuera de la diagonal:</strong> Revela errores de clasificación, señalando áreas para mejorar.</li>
+      </ul>
+    </div>
+
+    <div class="content-card">
+      <div class="card-header">
+        <h2 class="card-title">Gráfica de Precisión y Pérdida del Modelo CNN</h2>
+      </div>
+
+      <img src="/static/Precisión_Pérdida.jpg" alt="Gráfica de precisión y pérdida del modelo CNN"
+        class="medical-image">
+
+      <h3><i class="fas fa-chart-line"></i> ¿Qué muestran estas gráficas?</h3>
+      <p>Estas gráficas ilustran el proceso de aprendizaje del modelo durante su entrenamiento:</p>
+
+      <h4><i class="fas fa-check-circle"></i> Gráfica de Precisión</h4>
+      <ul class="medical-list">
+        <li><strong>Línea azul:</strong> Precisión en datos de entrenamiento.</li>
+        <li><strong>Línea naranja:</strong> Precisión en datos de validación (nuevos para el modelo).</li>
+        <li><strong>Interpretación:</strong> Ambas curvas alcanzan valores cercanos al 100%, indicando un aprendizaje
+          efectivo y buena generalización.</li>
+      </ul>
+
+      <h4><i class="fas fa-exclamation-triangle"></i> Gráfica de Pérdida</h4>
+      <ul class="medical-list">
+        <li>Muestra el error del modelo en cada iteración.</li>
+        <li><strong>Comportamiento ideal:</strong> Ambas curvas disminuyen rápidamente y se estabilizan cerca de cero.
+        </li>
+        <li><strong>Conclusión:</strong> El modelo converge correctamente sin sobreajuste.</li>
+      </ul>
+    </div>
+
+    <div class="content-card">
+      <div class="card-header">
+        <h2 class="card-title">Curva ROC Modelo Random Forest</h2>
+      </div>
+
+      <img src="/static/Precisión_PérdidaExcel.jpg" alt="Curva ROC del modelo Random Forest" class="medical-image">
+
+      <h3><i class="fas fa-chart-area"></i> ¿Qué significa esta Curva ROC?</h3>
+      <p>
+        La <strong>Curva ROC (Receiver Operating Characteristic)</strong> evalúa la capacidad del modelo para
+        distinguir entre pacientes con y sin cáncer de pulmón.
+      </p>
+
+      <h4><i class="fas fa-search"></i> Elementos clave</h4>
+      <ul class="medical-list">
+        <li><strong>Eje X (Tasa de Falsos Positivos):</strong> Casos sanos incorrectamente clasificados como positivos.
+        </li>
+        <li><strong>Eje Y (Tasa de Verdaderos Positivos):</strong> Casos con cáncer detectados correctamente.</li>
+        <li><strong>Línea azul:</strong> Rendimiento del modelo actual.</li>
+        <li><strong>Línea naranja:</strong> Referencia de un modelo aleatorio.</li>
+      </ul>
+
+      <h4><i class="fas fa-lightbulb"></i> Interpretación</h4>
+      <ul class="medical-list">
+        <li>Cuanto más se acerque la curva azul a la esquina superior izquierda, mejor es el modelo.</li>
+        <li>El <strong>Área Bajo la Curva (AUC)</strong> cuantifica el rendimiento (idealmente cercano a 1).</li>
+        <li>En este caso, el modelo supera la clasificación aleatoria, pero tiene margen de mejora.</li>
+      </ul>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-section">
+          <h3>Proyecto BigData</h3>
+          <p>Investigación avanzada en diagnóstico asistido por IA para cáncer de pulmón.</p>
+          <a href="{{ url_for('estadisticas') }}">Ver estadísticas</a>
+        </div>
+
+        <div class="footer-section">
+          <h3>Contacto</h3>
+          <a href="mailto:investigacion@bigdatahealth.org"><i class="fas fa-envelope"></i>
+            investigacion@bigdatahealth.org</a>
+          <a href="tel:+524499105002"><i class="fas fa-phone"></i> +52 449 910 5002</a>
+          <a href="https://maps.google.com/?q=Av.+Adolfo+López+Mateos+Ote.+1801,+Aguascalientes" target="_blank">
+            <i class="fas fa-map-marker-alt"></i> Ubicación
+          </a>
+        </div>
+
+
+      </div>
+
+      <p class="copyright">&copy; 2025 Proyecto BigData. Todos los derechos reservados.</p>
+    </footer>
+  </main>
+
+  <script>
+    // Mobile menu toggle functionality
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+    });
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth <= 992) {
+        if (!sidebar.contains(e.target) && e.target !== menuToggle) {
+          sidebar.classList.remove('active');
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>
